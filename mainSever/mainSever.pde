@@ -44,14 +44,17 @@ void setup() {
 void draw() {
   //背景設定
   background(#086C52);
+  textSize(28);
+  text("自動開閉ゴミ箱システム", 28, 30);
 
+  textSize(16);
   for(int i = 0; i < MAX_CLIENT; i++) {
-    text("Server: " + ServerIP[i] + ", State: " + State, 30, 20 + i * 100);
-    text("Client: " + ClientIP[i], 30, 40 + i * 100);
-    text(Message[i], 30, 60 + i * 100);
+    text("Server: " + ServerIP[i] + ", State: " + State, 30, 55 + i * 100);
+    text("Client: " + ClientIP[i], 30, 75 + i * 100);
+    text(Message[i], 30, 95 + i * 100);
   }
 
-  text(ServerMsg[0], 30,180);
+  text(ServerMsg[0], 30, 215);
 }
 
 // Connect Server
@@ -93,17 +96,17 @@ void clientEvent( Client RecvClient ) {
         Message[0] = "Received " + str((trigger)) + " from Trush";
         if (trigger == 1) { //センサーから受け取った値が想定値の場合
           byte is_ok = 1;
-          // binに送信準備
+          // binにトリガー送信
           myServer[1].write(is_ok);
           Message[1] = "Send " + str(is_ok) + " to bin.";
-
+          cntTrush++;
+          // State移行
           State = 2;
         } else if (trigger == 0) {
           Message[1] = "Bin is not for ready.";
         } else {
           Message[1] = "Trigger send error. Trigger is " + str(trigger);
         }
-        cntTrush++;
         ServerMsg[0] = "Trush count -> " + cntTrush;
       }
       break;

@@ -3,6 +3,7 @@ Client myClient;
 
 int State;
 String Message;
+String status;
 
 void setup() {
   size(400, 200);
@@ -14,13 +15,15 @@ void setup() {
   myClient = new Client(this, "localhost", 7979);
 
   State = 0;
-  Message = " ";
+  Message = "Connecting server...";
+  status = "";
 }
 
 void draw() {
   background(#540D93);
-  text("クライアントB" + ", State: " + State, 30, 20);
+  text("ゴミ箱" + ", State: " + State, 30, 20);
   text(Message, 30, 40);
+  text(status, 30, 60);
 }
 
 void clientEvent( Client c ) {
@@ -30,12 +33,14 @@ void clientEvent( Client c ) {
   switch(State) {
     case 0 :
       Message = "Connected server" + str(myBuffer[0]);
+      status = "waiting...";
       State = 1;
       break;
     case 1 :
       // trigerを受け取って行う挙動
       if (myBuffer[0] == 1) {
         Message = "Recieved trigger " + str(myBuffer[0]) + " ";
+        status = "Moving!";
         State = 2;
       } else {
         Message = "Trigger is not 1. : " + str(myBuffer[0]);
@@ -51,8 +56,6 @@ void clientEvent( Client c ) {
   c.clear();
 }
 
-
-// よくわからんやつ
 void keyTyped() {
   switch( State ) {
     case 0 :
@@ -61,15 +64,15 @@ void keyTyped() {
         Byte sendData;
         if (key < 50) {
           sendData = 1;
+          status = "Waiting...";
+          State = 1;
         } else {
           sendData = 0;
         }
         myClient.write(sendData);
-        Message = "This is State 2. send " + key;
-        State = 1;
+        Message = "Send " + key;
       break;
     default :
       break;
   }
-  println(State);
 }
