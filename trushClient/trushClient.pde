@@ -15,11 +15,12 @@ void setup() {
 
   State = 0;
   Message = " ";
+  println("Ready to go!");
 }
 
 void draw() {
   background(#2D3986);
-  text("クライアントA", 30, 20);
+  text("クライアントA" + ", State: " + State, 30, 20);
   text(Message, 30, 40);
 }
 
@@ -33,6 +34,27 @@ void clientEvent( Client c ) {
       State = 1;
       break;
     case 1 :
+      // Message = "ClientA send " + str(key) + ".";
+
+      // byte sendData;
+      // if (key < 50) {
+      //   sendData = 1;
+      // } else {
+      //   sendData = 0;
+      // }
+      // myClient.write(sendData);
+      // State = 2;
+      break;
+    case 2 :
+      if (myBuffer[0] == 1) {
+        Message = "Received server to reset.";
+      } else if (myBuffer[0] == 0) {
+        break;
+      } else {
+        Message = "error : " + myBuffer[0];
+      }
+      break;
+    default :
       break;
   }
 
@@ -40,17 +62,20 @@ void clientEvent( Client c ) {
 }
 
 void keyTyped() {
-  switch( State ) {
-    case 0 :
+  switch(State) {
+    case 0:
       break;
-    case 1 :
+    case 1:
       Message = "ClientA send " + str(key) + ".";
 
       byte sendData;
-      sendData = byte(key);
+      if (key < 50) {
+        sendData = 1;
+      } else {
+        sendData = 0;
+      }
       myClient.write(sendData);
-      break;
-    default :
+      State = 2;
       break;
   }
 }

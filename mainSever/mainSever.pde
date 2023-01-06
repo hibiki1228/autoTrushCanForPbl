@@ -11,18 +11,21 @@ int State;
 int numClient;
 
 String[] Message = new String[MAX_CLIENT];
+String[] ServerMsg = new String[2];
+
+int cntTrush = 0;
 
 void setup() {
   // window生成
-  size(400, 200);
+  size(400, 300);
 
   // フォント生成
   PFont font = createFont("BIZ UDゴシック", 16, true);
   textFont(font);
 
   // Start server
-  PortNum [0] = 8080; //Client1
-  PortNum [1] = 7979; //CLient2
+  PortNum [0] = 8080; //Trush
+  PortNum [1] = 7979; //Bin
   myServer[0] = new Server(this, PortNum[0]);
   myServer[1] = new Server(this, PortNum[1]);
 
@@ -31,6 +34,7 @@ void setup() {
     ServerIP[i] = myServer[i].ip( ) + " #" + PortNum[i];
     ClientIP[i] = " ";
     Message [i] = " ";
+    ServerMsg[i] = " ";
   }
 
   State = 0;
@@ -46,8 +50,11 @@ void draw() {
     text("Client: " + ClientIP[i], 30, 40 + i * 100);
     text(Message[i], 30, 60 + i * 100);
   }
+
+  text(ServerMsg[0], 30,180);
 }
 
+// Connect Server
 void serverEvent( Server ConServer, Client ConClient ) {
   String[] ClientID = {"A", "B"};
 
@@ -66,6 +73,7 @@ void serverEvent( Server ConServer, Client ConClient ) {
     for(int i = 0; i < MAX_CLIENT; i++) {
       byte sendData = (byte)0;
       myServer[0].write(sendData);
+      myServer[1].write(sendData);
     }
     State = 1;
   }
@@ -76,15 +84,61 @@ void clientEvent( Client RecvClient ) {
   byte[] myBuffer = RecvClient.readBytes(NumBytes);
 
   switch( State ) {
-    case 0 :
+    case 0 : // server setting
       break;
-    case 1 :
+    case 1 : // trushから値を受信
       if ( RecvClient == myClient[0] ) {
-        byte keyval = myBuffer[0];
-        Message[0] = "Received " + str(char(keyval)) + " from ClientA";
-
-        myServer[1].write(keyval);
-        Message[1] = "Send " + str(char(keyval)) + " to B.";
+        byte trigger = myBuffer[0];
+        Message[0] = "Received " + str((trigger)) + " from Trush";
+        println("S1");
+        if (trigger == 1) { //センサーから受け取った値が想定値の場合
+          byte is_ok = 1;
+          // binに送信準備
+          myServer[1].write(is_ok);
+          println(myServer[1]);
+          // if (myServer[1] == 1) {
+          Message[1] = "Send " + str(is_ok) + " to B.";
+          // } else {
+          //   Message[1] = "error";
+          // }
+          State = 2;
+          println("S1: trigger 1");
+        } else if (trigger == 0) {
+          int is_not_ok = 0;
+          myServer[1].write(is_not_ok);
+          Message[1] = "Recieved far is " + str(is_not_ok) + " to B.";
+          println("S1: trigger 0");
+        } else {
+          Message[1] = "Trigger send error. Trigger is " + str(trigger);
+          println("S1: else");
+        }
+        cntTrush++;
+        ServerMsg[0] = "Trush count -> " + cntTrush;
+        println("S1: end");
+      }
+      break;
+    case 2 : // ゴミ箱の動作終了待機
+      // println(myClient[1]);
+      if ( RecvClient == myClient[1] ) {
+        byte trigger = myBuffer[0];
+        Message[1] = "Received " + str((trigger)) + " from bin";
+        println("S2");
+        if (trigger == 1) {
+          int is_ok = 1;
+          // binに送信準備
+          myServer[0].write(is_ok);
+          Message[0] = "Send " + str(is_ok) + " to A.";
+          State = 0;
+          println("S2: trigger 1");
+        } else if (trigger == 0) {
+          int is_not_ok = 0;
+          myServer[0].write(is_not_ok);
+          Message[0] = "Send " + str(is_not_ok) + " to A.";
+          println("S2: trigger 0");
+        } else {
+          Message[1] = "Trigger send error. Trigger is " + str(trigger);
+          println("S2: else");
+        }
       }
       break;
     default :
@@ -93,3 +147,7 @@ void clientEvent( Client RecvClient ) {
 
   RecvClient.clear();
 }
+
+// void recieveTrushEvent( Client RecvClient ) {
+
+// }
