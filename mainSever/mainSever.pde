@@ -79,6 +79,7 @@ void serverEvent( Server ConServer, Client ConClient ) {
   }
 }
 
+// main func
 void clientEvent( Client RecvClient ) {
   int NumBytes = RecvClient.available();
   byte[] myBuffer = RecvClient.readBytes(NumBytes);
@@ -96,48 +97,32 @@ void clientEvent( Client RecvClient ) {
           // binに送信準備
           myServer[1].write(is_ok);
           println(myServer[1]);
-          // if (myServer[1] == 1) {
-          Message[1] = "Send " + str(is_ok) + " to B.";
-          // } else {
-          //   Message[1] = "error";
-          // }
+          Message[1] = "Send " + str(is_ok) + " to bin.";
+
           State = 2;
-          println("S1: trigger 1");
         } else if (trigger == 0) {
-          int is_not_ok = 0;
-          myServer[1].write(is_not_ok);
-          Message[1] = "Recieved far is " + str(is_not_ok) + " to B.";
-          println("S1: trigger 0");
+          Message[1] = "Bin is not for ready.";
         } else {
           Message[1] = "Trigger send error. Trigger is " + str(trigger);
-          println("S1: else");
         }
         cntTrush++;
         ServerMsg[0] = "Trush count -> " + cntTrush;
-        println("S1: end");
       }
       break;
     case 2 : // ゴミ箱の動作終了待機
-      // println(myClient[1]);
       if ( RecvClient == myClient[1] ) {
         byte trigger = myBuffer[0];
         Message[1] = "Received " + str((trigger)) + " from bin";
-        println("S2");
         if (trigger == 1) {
           int is_ok = 1;
           // binに送信準備
           myServer[0].write(is_ok);
           Message[0] = "Send " + str(is_ok) + " to A.";
-          State = 0;
-          println("S2: trigger 1");
+          State = 1;
         } else if (trigger == 0) {
-          int is_not_ok = 0;
-          myServer[0].write(is_not_ok);
-          Message[0] = "Send " + str(is_not_ok) + " to A.";
-          println("S2: trigger 0");
+          Message[0] = "Trush is waiting...";
         } else {
-          Message[1] = "Trigger send error. Trigger is " + str(trigger);
-          println("S2: else");
+          Message[1] = "Trigger send error.";
         }
       }
       break;
@@ -147,7 +132,3 @@ void clientEvent( Client RecvClient ) {
 
   RecvClient.clear();
 }
-
-// void recieveTrushEvent( Client RecvClient ) {
-
-// }

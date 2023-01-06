@@ -34,20 +34,11 @@ void clientEvent( Client c ) {
       State = 1;
       break;
     case 1 :
-      // Message = "ClientA send " + str(key) + ".";
-
-      // byte sendData;
-      // if (key < 50) {
-      //   sendData = 1;
-      // } else {
-      //   sendData = 0;
-      // }
-      // myClient.write(sendData);
-      // State = 2;
       break;
     case 2 :
       if (myBuffer[0] == 1) {
         Message = "Received server to reset.";
+        State = 1;
       } else if (myBuffer[0] == 0) {
         break;
       } else {
@@ -66,7 +57,7 @@ void keyTyped() {
     case 0:
       break;
     case 1:
-      Message = "ClientA send " + str(key) + ".";
+      Message = "ClientA send " + str(key) + ".\n" + "Wait...";
 
       byte sendData;
       if (key < 50) {
