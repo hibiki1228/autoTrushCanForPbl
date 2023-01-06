@@ -91,12 +91,10 @@ void clientEvent( Client RecvClient ) {
       if ( RecvClient == myClient[0] ) {
         byte trigger = myBuffer[0];
         Message[0] = "Received " + str((trigger)) + " from Trush";
-        println("S1");
         if (trigger == 1) { //センサーから受け取った値が想定値の場合
           byte is_ok = 1;
           // binに送信準備
           myServer[1].write(is_ok);
-          println(myServer[1]);
           Message[1] = "Send " + str(is_ok) + " to bin.";
 
           State = 2;
