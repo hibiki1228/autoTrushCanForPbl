@@ -7,13 +7,15 @@ int   [] PortNum  = new int[MAX_CLIENT];
 Client[] myClient = new Client[MAX_CLIENT];
 String[] ClientIP = new String[MAX_CLIENT];
 
-int State;
-int numClient;
 
 String[] Message = new String[MAX_CLIENT];
 String[] ServerMsg = new String[2];
 
+
+int State;
+int numClient;
 int cntTrush = 0;
+// String caution;
 
 void setup() {
   // window生成
@@ -37,6 +39,7 @@ void setup() {
     ServerMsg[i] = " ";
   }
 
+  // caution = ""
   State = 0;
   numClient = 0;
 }
@@ -55,6 +58,7 @@ void draw() {
   }
 
   text(ServerMsg[0], 30, 215);
+  text(ServerMsg[1], 30, 230);
 }
 
 // Connect Server
@@ -98,16 +102,20 @@ void clientEvent( Client RecvClient ) {
           byte is_ok = 1;
           // binにトリガー送信
           myServer[1].write(is_ok);
-          Message[1] = "Send " + str(is_ok) + " to bin.";
+          Message[1] = "ゴミ箱を動かします";
+          // ゴミを入れた回数をカウント
           cntTrush++;
+          if (cntTrush >= 10) {
+            ServerMsg[1] = "ゴミ出し過ぎじゃない？？";
+          }
           // State移行
           State = 2;
         } else if (trigger == 0) {
-          Message[1] = "Bin is not for ready.";
+          Message[1] = "準備中・・・";
         } else {
           Message[1] = "Trigger send error. Trigger is " + str(trigger);
         }
-        ServerMsg[0] = "Trush count -> " + cntTrush;
+        ServerMsg[0] = "ゴミ捨て回数 -> " + cntTrush;
       }
       break;
     case 2 : // ゴミ箱の動作終了待機
@@ -118,12 +126,12 @@ void clientEvent( Client RecvClient ) {
           int is_ok = 1;
           // binに送信準備
           myServer[0].write(is_ok);
-          Message[0] = "Send " + str(is_ok) + " to A.";
+          Message[0] = "待機解除";
           State = 1;
         } else if (trigger == 0) {
-          Message[0] = "Trush is waiting...";
+          Message[0] = "準備中・・・";
         } else {
-          Message[1] = "Trigger send error.";
+          Message[0] = "Trigger send error. Trigger is " + str(trigger);
         }
       }
       break;
